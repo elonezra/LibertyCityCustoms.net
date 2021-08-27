@@ -87,8 +87,9 @@ namespace LibertyCityCustoms.Scripts
     int color_price = 500;
     int specular_color_price = 700;
     int extra_color_price = 200;
+    int extra2_color_price = 170;
 
-    public LibertyCityCustoms()
+        public LibertyCityCustoms()
     {
       this.colorInfo = this.colors.GetProperties(BindingFlags.Static | BindingFlags.Public);
       this.lst = new Dictionary<Vehicle, Light>();
@@ -124,7 +125,9 @@ namespace LibertyCityCustoms.Scripts
       this.PerFrameDrawing += new GraphicsEventHandler(menu_draw);
       // ISSUE: method pointer
       this.PerFrameDrawing += new GraphicsEventHandler(goin_draw);
-      // ISSUE: method pointer
+        // ISSUE: method pointer
+      this.PerFrameDrawing += new GraphicsEventHandler(money_state);
+
       this.KeyDown += new GTA.KeyEventHandler(menu_nav);
       this.Tick += new EventHandler(this.ticks);
       this.vec.Add(this.out1);
@@ -322,7 +325,7 @@ namespace LibertyCityCustoms.Scripts
         this.menu.Add("Primary color   "+color_price+"$");
         this.menu.Add("Specular color  " + specular_color_price+"$");
         this.menu.Add("Featured color  "+ extra_color_price+"$");
-        this.menu.Add("Featured2 color");
+        this.menu.Add("Featured2 color  " + extra2_color_price + "$");
       }
       else if (this.menu_name == "color" || this.menu_name == "specular_color" || this.menu_name == "extra_color" || this.menu_name == "extra2_color")
       {
@@ -616,10 +619,7 @@ namespace LibertyCityCustoms.Scripts
       this.Inside = true;
       this.garage_light.Enabled = true;
       this.garage_light.Range = this.intensity;
-      /*Function.Call("FORCE_LOADING_SCREEN", new Parameter[1]
-      {
-        Parameter.op_Implicit(0)
-      });*/
+
       if (this.Player.Character.CurrentVehicle.Health < 1000)
       {
         this.repair_cost = 1000 - this.repair_cost;
@@ -636,10 +636,6 @@ namespace LibertyCityCustoms.Scripts
     private void SetOutOfGarage()
     {
       this.Inside = false;
-      /*Function.Call("FORCE_LOADING_SCREEN", new Parameter[1]
-      {
-        Parameter.op_Implicit(1)
-      });*/
       this.Player.Character.CurrentVehicle.Position = ((Vector3) this.exit_pos).ToGround();
       this.Wait(2000);
       this.Player.Character.CurrentVehicle.PlaceOnGroundProperly();
@@ -647,10 +643,6 @@ namespace LibertyCityCustoms.Scripts
       this.Player.Character.CurrentVehicle.DoorLock = (DoorLock) 0;
       this.i_info = "";
       this.garage_light.Enabled = false;
-      /*Function.Call("FORCE_LOADING_SCREEN", new Parameter[1]
-      {
-        Parameter.op_Implicit(0)
-      });*/
     }
 
     private void GoBack()
@@ -749,73 +741,93 @@ namespace LibertyCityCustoms.Scripts
       {
         if (this.menu.Count <= 0)
           return;
-        if (this.cur_i == "Back" || this.cur_i == "Exit")
-          this.GoBack();
-        else if (this.menu_name == "repair")
-        {
-          if (!(this.cur_i == ("Repair     " + repair_price + "$")))
-            return;
-          if (this.Player.Money - repair_price < 0)
-           {
-            Game.DisplayText("not enough money, lack of " + repair_price + "$");
-            return;
-           }
-          this.Player.Character.CurrentVehicle.Repair();
-          this.Player.Money = this.Player.Money - repair_price;
-          this.NextMenu("main");
-        }
-        else if (this.menu_name == "main")
-        {
-          if (this.cur_i == "Respray")
-            this.NextMenu("respray");
-          else if (this.cur_i == "Options")
-            this.NextMenu("options");
-          else if (this.cur_i == "Brakes")
-            this.NextMenu("brakes");
-          else if (this.cur_i == "Neons")
-            this.NextMenu("neon");
-          else if (this.cur_i == "Wash")
-          {
-           
-            this.Inside = false;
-            this.Wait(5000);
-            this.Inside = true;
-            this.Player.Character.CurrentVehicle.Wash();
-          /*  Function.Call("REMOVE_PTFX_FROM_VEHICLE", new Parameter[1]
-            {
-              Parameter.op_Implicit(this.Player.Character.CurrentVehicle)
-            });*/
-          }
-          else if (this.cur_i == "Extras")
-          {
-            this.NextMenu("extras");
-          }
-          else
-          {
-            if (!(this.cur_i == "Defense"))
-              return;
-            this.NextMenu("Defense");
-          }
-        }
-        else if (this.menu_name == "respray")
-        {
-          if (this.cur_i == "Primary color   " + color_price + "$")
-            this.NextMenu("color");
-          else if (this.cur_i == "Specular color  " + specular_color_price + "$")
-            this.NextMenu("specular_color");
-          else if (this.cur_i == "Featured color  " + extra_color_price + "$")
-          {
-            this.NextMenu("extra_color");
-          }
-          else
-          {
-            if (!(this.cur_i == "Featured2 color"))
-              return;
-            this.NextMenu("extra2_color");
-          }
-        }
-        else if (this.menu_name == "color")
-        {
+                if (this.cur_i == "Back" || this.cur_i == "Exit")
+                    this.GoBack();
+                else if (this.menu_name == "repair")
+                {
+                    if (!(this.cur_i == ("Repair     " + repair_price + "$")))
+                        return;
+                    if (this.Player.Money - repair_price < 0)
+                    {
+                        Game.DisplayText("not enough money, lack of " + repair_price + "$");
+                        return;
+                    }
+                    this.Player.Character.CurrentVehicle.Repair();
+                    this.Player.Money = this.Player.Money - repair_price;
+                    this.NextMenu("main");
+                }
+                else if (this.menu_name == "main")
+                {
+                    if (this.cur_i == "Respray")
+                        this.NextMenu("respray");
+                    else if (this.cur_i == "Options")
+                        this.NextMenu("options");
+                    else if (this.cur_i == "Brakes")
+                        this.NextMenu("brakes");
+                    else if (this.cur_i == "Neons")
+                        this.NextMenu("neon");
+                    else if (this.cur_i == "Wash")
+                    {
+                        /*
+                        Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9]
+{
+                              Parameter.op_Implicit("shot_directed_water"),
+                              Parameter.op_Implicit(this.Player.Character.CurrentVehicle),
+                              Parameter.op_Implicit(-4.7f),
+                              Parameter.op_Implicit(-5f),
+                              Parameter.op_Implicit(8f),
+                              Parameter.op_Implicit(130f),
+                              Parameter.op_Implicit(0.0f),
+                              Parameter.op_Implicit(500f),
+                              Parameter.op_Implicit(5f)
+});
+                        Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9]
+                        {
+                              Parameter.op_Implicit("shot_directed_water"),
+                              Parameter.op_Implicit(this.Player.Character.CurrentVehicle),
+                              Parameter.op_Implicit(7f),
+                              Parameter.op_Implicit(0.0f),
+                              Parameter.op_Implicit(8f),
+                              Parameter.op_Implicit(130f),
+                              Parameter.op_Implicit(0.0f),
+                              Parameter.op_Implicit(3500f),
+                              Parameter.op_Implicit(5f)
+                        });*/
+                        this.Inside = false;
+                        this.Wait(5000);
+                        this.Inside = true;
+                        this.Player.Character.CurrentVehicle.Wash();
+                    }
+                    else if (this.cur_i == "Extras")
+                    {
+                        this.NextMenu("extras");
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Defense"))
+                            return;
+                        this.NextMenu("Defense");
+                    }
+                }
+                else if (this.menu_name == "respray")
+                {
+                    if (this.cur_i == "Primary color   " + color_price + "$")
+                        this.NextMenu("color");
+                    else if (this.cur_i == "Specular color  " + specular_color_price + "$")
+                        this.NextMenu("specular_color");
+                    else if (this.cur_i == "Featured color  " + extra_color_price + "$")
+                    {
+                        this.NextMenu("extra_color");
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Featured2 color  " + extra2_color_price + "$"))
+                            return;
+                        this.NextMenu("extra2_color");
+                    }
+                }
+                else if (this.menu_name == "color")
+                {
                     if (this.Player.Money - color_price < 0)
                         Game.DisplayText("Not enough money");
                     else
@@ -824,175 +836,202 @@ namespace LibertyCityCustoms.Scripts
                         this.base_col = this.chosen_col;
                     }
 
-        }
-        else if (this.menu_name == "specular_color")
-          this.specular_col = this.chosen_col;
-        else if (this.menu_name == "extra_color")
-          this.extra_col = this.chosen_col;
-        else if (this.menu_name == "extra2_color")
-          this.extra2_col = this.chosen_col;
-        else if (this.menu_name == "options")
-        {
-          if (this.cur_i == "Menu position")
-          {
-            this.NextMenu("menu_pos");
-          }
-          else
-          {
-            if (!(this.cur_i == "Garage lighting"))
-              return;
-            this.NextMenu("garage lighting");
-          }
-        }
-        else if (this.menu_name == "garage lighting")
-        {
-          this.garage_light_current_color = Color.FromName(this.garage_light_name);
-          this.garage_light_name = this.garage_light_current_color.Name;
-          if (this.cur_i == "Position")
-            this.NextMenu("light position");
-          else if (this.cur_i == "Intensity")
-            this.NextMenu("light intensity");
-          else if (this.cur_i == "Color")
-            this.NextMenu("light color");
-          else if (this.cur_i == "Enable" | this.cur_i == "Disable")
-          {
-            this.Lighting = !this.Lighting;
-            this.Settings.SetValue("enabled", "Garage lighting", this.Lighting);
-            this.NextMenu("garage lighting");
-          }
-          else
-          {
-            if (!(this.cur_i == "Range"))
-              return;
-            this.NextMenu("light range");
-          }
-        }
-        else if (this.menu_name == "light color")
-          this.garage_light_current_color = Color.FromName(this.garage_light_name);
-        else if (this.menu_name == "brakes")
-        {
-          Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
-          if (this.cur_i == "Slow")
-          {
-            if (this.veh_brakes_fast.Contains(currentVehicle))
-            {
-              this.veh_brakes_fast.Remove(currentVehicle);
-            }
-            else
-            {
-              if (!this.veh_brakes_fastest.Contains(currentVehicle))
-                return;
-              this.veh_brakes_fastest.Remove(currentVehicle);
-            }
-          }
-          else if (this.cur_i == "Fast")
-          {
-            if (this.veh_brakes_fast.Contains(currentVehicle))
-              return;
-            if (this.veh_brakes_fastest.Contains(currentVehicle))
-            {
-              this.veh_brakes_fastest.Remove(currentVehicle);
-              this.veh_brakes_fast.Add(currentVehicle);
-            }
-            else
-              this.veh_brakes_fast.Add(currentVehicle);
-          }
-          else
-          {
-            if (!(this.cur_i == "Fastest"))
-              return;
-            if (this.veh_brakes_fast.Contains(currentVehicle))
-            {
-              this.veh_brakes_fast.Remove(currentVehicle);
-              this.veh_brakes_fastest.Add(currentVehicle);
-            }
-            else
-            {
-              if (this.veh_brakes_fastest.Contains(currentVehicle))
-                return;
-              this.veh_brakes_fastest.Add(currentVehicle);
-            }
-          }
-        }
-        else if (this.menu_name == "neon")
-        {
-          Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
-          Light light = new Light();
-          light.Enabled = true;
-          Dictionary<Vehicle, Light> dictionary = new Dictionary<Vehicle, Light>((IDictionary<Vehicle, Light>) this.lst);
-          if (this.lst.ContainsKey(currentVehicle))
-          {
-            foreach (KeyValuePair<Vehicle, Light> keyValuePair in dictionary)
-            {
-              if (HandleObject.Equals((HandleObject) keyValuePair.Key, (HandleObject) this.Player.Character.CurrentVehicle))
-              {
-                if (this.cur_i == "Disable")
-                {
-                  keyValuePair.Value.Disable();
-                  this.lst.Remove(keyValuePair.Key);
-                  this.NextMenu("neon");
                 }
-                else if (this.cur_i == "Color")
-                  this.NextMenu("neon color");
-              }
-            }
-          }
-          else
-          {
-            if (!(this.cur_i == "Enable"))
-              return;
-            this.lst.Add(currentVehicle, light);
-            this.NextMenu("neon");
-          }
-        }
-        else if (this.menu_name == "neon color")
-        {
-          Dictionary<Vehicle, Light> dictionary = new Dictionary<Vehicle, Light>((IDictionary<Vehicle, Light>) this.lst);
-          if (!this.lst.ContainsKey(this.Player.Character.CurrentVehicle))
-            return;
-          foreach (KeyValuePair<Vehicle, Light> keyValuePair in dictionary)
-          {
-            if (HandleObject.Equals((HandleObject) keyValuePair.Key, (HandleObject) this.Player.Character.CurrentVehicle))
-            {
-              this.cur_light = this.chosen_light;
-              keyValuePair.Value.Color = this.cur_light;
-            }
-          }
-        }
-        else if (this.menu_name == "extras")
-        {
-          Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
-          if (this.cur_i == "1")
-            this.turn_extra(1);
-          else if (this.cur_i == "2")
-            this.turn_extra(2);
-          else if (this.cur_i == "3")
-            this.turn_extra(3);
-          else if (this.cur_i == "4")
-            this.turn_extra(4);
-          else if (this.cur_i == "5")
-            this.turn_extra(5);
-          else if (this.cur_i == "6")
-            this.turn_extra(6);
-          else if (this.cur_i == "7")
-            this.turn_extra(7);
-          else if (this.cur_i == "8")
-          {
-            this.turn_extra(8);
-          }
-          else
-          {
-            if (!(this.cur_i == "9"))
-              return;
-            this.turn_extra(9);
-          }
-        }
-        else
-        {
-          if (!(this.menu_name == "Defense") || !(this.cur_i == "Full Bullet proof"))
-            return;
-          this.Player.Character.CurrentVehicle.MakeProofTo(true, false, false, false, false);
-        }
+                else if (this.menu_name == "specular_color")
+                {
+                    if (this.Player.Money - specular_color_price < 0)
+                        Game.DisplayText("Not enough money");
+                    else
+                    {
+                        this.Player.Money = this.Player.Money - specular_color_price;
+                        this.specular_col = this.chosen_col;
+                    }
+                }
+
+                else if (this.menu_name == "extra_color")
+                {
+                    if (this.Player.Money - extra_color_price < 0)
+                        Game.DisplayText("Not enough money");
+                    else
+                    {
+                        this.Player.Money = this.Player.Money - extra_color_price;
+                        this.extra_col = this.chosen_col;
+                    }
+                }
+
+                else if (this.menu_name == "extra2_color")
+                {
+                    if (this.Player.Money - extra2_color_price < 0)
+                        Game.DisplayText("Not enough money");
+                    else
+                    {
+                        this.Player.Money = this.Player.Money - extra2_color_price;
+                        this.extra2_col = this.chosen_col;
+                    }
+                }
+
+                else if (this.menu_name == "options")
+                {
+                    if (this.cur_i == "Menu position")
+                    {
+                        this.NextMenu("menu_pos");
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Garage lighting"))
+                            return;
+                        this.NextMenu("garage lighting");
+                    }
+                }
+                else if (this.menu_name == "garage lighting")
+                {
+                    this.garage_light_current_color = Color.FromName(this.garage_light_name);
+                    this.garage_light_name = this.garage_light_current_color.Name;
+                    if (this.cur_i == "Position")
+                        this.NextMenu("light position");
+                    else if (this.cur_i == "Intensity")
+                        this.NextMenu("light intensity");
+                    else if (this.cur_i == "Color")
+                        this.NextMenu("light color");
+                    else if (this.cur_i == "Enable" | this.cur_i == "Disable")
+                    {
+                        this.Lighting = !this.Lighting;
+                        this.Settings.SetValue("enabled", "Garage lighting", this.Lighting);
+                        this.NextMenu("garage lighting");
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Range"))
+                            return;
+                        this.NextMenu("light range");
+                    }
+                }
+                else if (this.menu_name == "light color")
+                    this.garage_light_current_color = Color.FromName(this.garage_light_name);
+                else if (this.menu_name == "brakes")
+                {
+                    Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
+                    if (this.cur_i == "Slow")
+                    {
+                        if (this.veh_brakes_fast.Contains(currentVehicle))
+                        {
+                            this.veh_brakes_fast.Remove(currentVehicle);
+                        }
+                        else
+                        {
+                            if (!this.veh_brakes_fastest.Contains(currentVehicle))
+                                return;
+                            this.veh_brakes_fastest.Remove(currentVehicle);
+                        }
+                    }
+                    else if (this.cur_i == "Fast")
+                    {
+                        if (this.veh_brakes_fast.Contains(currentVehicle))
+                            return;
+                        if (this.veh_brakes_fastest.Contains(currentVehicle))
+                        {
+                            this.veh_brakes_fastest.Remove(currentVehicle);
+                            this.veh_brakes_fast.Add(currentVehicle);
+                        }
+                        else
+                            this.veh_brakes_fast.Add(currentVehicle);
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Fastest"))
+                            return;
+                        if (this.veh_brakes_fast.Contains(currentVehicle))
+                        {
+                            this.veh_brakes_fast.Remove(currentVehicle);
+                            this.veh_brakes_fastest.Add(currentVehicle);
+                        }
+                        else
+                        {
+                            if (this.veh_brakes_fastest.Contains(currentVehicle))
+                                return;
+                            this.veh_brakes_fastest.Add(currentVehicle);
+                        }
+                    }
+                }
+                else if (this.menu_name == "neon")
+                {
+                    Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
+                    Light light = new Light();
+                    light.Enabled = true;
+                    Dictionary<Vehicle, Light> dictionary = new Dictionary<Vehicle, Light>((IDictionary<Vehicle, Light>)this.lst);
+                    if (this.lst.ContainsKey(currentVehicle))
+                    {
+                        foreach (KeyValuePair<Vehicle, Light> keyValuePair in dictionary)
+                        {
+                            if (HandleObject.Equals((HandleObject)keyValuePair.Key, (HandleObject)this.Player.Character.CurrentVehicle))
+                            {
+                                if (this.cur_i == "Disable")
+                                {
+                                    keyValuePair.Value.Disable();
+                                    this.lst.Remove(keyValuePair.Key);
+                                    this.NextMenu("neon");
+                                }
+                                else if (this.cur_i == "Color")
+                                    this.NextMenu("neon color");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "Enable"))
+                            return;
+                        this.lst.Add(currentVehicle, light);
+                        this.NextMenu("neon");
+                    }
+                }
+                else if (this.menu_name == "neon color")
+                {
+                    Dictionary<Vehicle, Light> dictionary = new Dictionary<Vehicle, Light>((IDictionary<Vehicle, Light>)this.lst);
+                    if (!this.lst.ContainsKey(this.Player.Character.CurrentVehicle))
+                        return;
+                    foreach (KeyValuePair<Vehicle, Light> keyValuePair in dictionary)
+                    {
+                        if (HandleObject.Equals((HandleObject)keyValuePair.Key, (HandleObject)this.Player.Character.CurrentVehicle))
+                        {
+                            this.cur_light = this.chosen_light;
+                            keyValuePair.Value.Color = this.cur_light;
+                        }
+                    }
+                }
+                else if (this.menu_name == "extras")
+                {
+                    Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
+                    if (this.cur_i == "1")
+                        this.turn_extra(1);
+                    else if (this.cur_i == "2")
+                        this.turn_extra(2);
+                    else if (this.cur_i == "3")
+                        this.turn_extra(3);
+                    else if (this.cur_i == "4")
+                        this.turn_extra(4);
+                    else if (this.cur_i == "5")
+                        this.turn_extra(5);
+                    else if (this.cur_i == "6")
+                        this.turn_extra(6);
+                    else if (this.cur_i == "7")
+                        this.turn_extra(7);
+                    else if (this.cur_i == "8")
+                    {
+                        this.turn_extra(8);
+                    }
+                    else
+                    {
+                        if (!(this.cur_i == "9"))
+                            return;
+                        this.turn_extra(9);
+                    }
+                }
+                else
+                {
+                    if (!(this.menu_name == "Defense") || !(this.cur_i == "Full Bullet proof"))
+                        return;
+                    this.Player.Character.CurrentVehicle.MakeProofTo(true, false, false, false, false);
+                }
       }
       else
       {
@@ -1010,24 +1049,18 @@ namespace LibertyCityCustoms.Scripts
         }
         else if (this.menu_name == "specular_color")
         {
-        if (this.Player.Money - specular_color_price < 0)
-            Game.DisplayText("Not enough money");
+
           this.chosen_col = this.specular_col;
           this.Player.Character.CurrentVehicle.SpecularColor = this.chosen_col;
-         this.Player.Money = this.Player.Money - specular_color_price;
          this.GoBack();
         }
         else if (this.menu_name == "extra_color")
         {
-                    if (this.Player.Money - extra_color_price < 0)
-                        Game.DisplayText("Not enough money");
-                    else
-                    {
-                        this.chosen_col = this.extra_col;
-                        this.Player.Character.CurrentVehicle.FeatureColor1 = this.chosen_col;
-                        this.Player.Money = this.Player.Money - extra_color_price;
-                        this.GoBack();
-                    }
+
+        this.chosen_col = this.extra_col;
+        this.Player.Character.CurrentVehicle.FeatureColor1 = this.chosen_col;
+        this.GoBack();
+                    
         }
         else if (this.menu_name == "extra2_color")
         {
@@ -1072,6 +1105,21 @@ namespace LibertyCityCustoms.Scripts
           e.Graphics.DrawText("Press Y to get in to the garage", 0.3f, 0.3f);
       }
     }
+    private void money_state(object sender, GraphicsEventArgs e)
+    {
+            
+            e.Graphics.Scaling = (FontScaling)2;
+            
+        if ((!this.Inside) || this.SaveMenu || !this.Player.Character.isInVehicle())
+            return;
+        Model model = this.Player.Character.CurrentVehicle.Model;
+        if (!((Model)model).isCar)
+            return;
+
+        e.Graphics.DrawText(this.Player.Money+"$", 1024f, 100f,f2);
+       
+    }
+
 
     private void turn_extra(int id)
     {
