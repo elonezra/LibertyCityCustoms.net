@@ -76,6 +76,7 @@ namespace LibertyCityCustoms.Scripts
     private float intensity;
     private float light_range;
     private Dictionary<Vehicle, Light> lst;
+    private Vehicle antiTeftCarSave;
     private System.Type colors = typeof (Color);
     private PropertyInfo[] colorInfo;
     private Color cur_light;
@@ -83,11 +84,16 @@ namespace LibertyCityCustoms.Scripts
     private List<VehicleExtra> extr = new List<VehicleExtra>();
     private GTA.Font f;
     private GTA.Font f2 = new GTA.Font("AR DESTINE", 0.9f, (FontScaling) 0, true, false);
+    // prices
     int repair_price = 0;
     int color_price = 500;
+        int wash_price = 20;
+    int ATSPpremium_price = 1452;
     int specular_color_price = 700;
     int extra_color_price = 200;
     int extra2_color_price = 170;
+    int basic_defense_price = 20000;
+    int advance_defense_price = 50000;
 
         public LibertyCityCustoms()
     {
@@ -155,11 +161,16 @@ namespace LibertyCityCustoms.Scripts
       this.light_range = this.Settings.GetValueFloat("range", "Garage lighting", 10f);
       this.Lighting = this.Settings.GetValueBool("enabled", "Garage lighting", false);
       Game.Console.Print("LibertyCityCustoms V2.2 by Elon loaded !");
+      
     }
 
     private void ticks(object sender, EventArgs e)
     {
-      if (this.lst.Count > 0)
+            if(this.Player.Character.isInVehicle())
+            {
+                Game.DisplayText(Player.Character.CurrentVehicle.GetMetadata<int>("Defense_level") + ": engin Health");
+            }
+            if (this.lst.Count > 0)
       {
         foreach (KeyValuePair<Vehicle, Light> keyValuePair in this.lst)
         {
@@ -308,6 +319,7 @@ namespace LibertyCityCustoms.Scripts
         this.menu.Add("Brakes");
         this.menu.Add("Defense");
         this.menu.Add("Neons");
+        this.menu.Add("Anti Theft system");
         this.menu.Add("Extras");
         this.menu.Add("Wash");
         this.menu.Add("Options");
@@ -327,13 +339,20 @@ namespace LibertyCityCustoms.Scripts
         this.menu.Add("Featured color  "+ extra_color_price+"$");
         this.menu.Add("Featured2 color  " + extra2_color_price + "$");
       }
+
+      else if (this.menu_name == "Anti Theft system")
+      {
+        this.SetUpMenu("Anti Theft system", false, "main", false);
+        this.menu.Add("Set Primum ATS  " + color_price + "$");
+      }
+
       else if (this.menu_name == "color" || this.menu_name == "specular_color" || this.menu_name == "extra_color" || this.menu_name == "extra2_color")
       {
         this.SetUpMenu("COLORS", true, "respray", true);
         this.SetColors();
                
       }
-      else if (this.menu_name == "garage lighting")
+     /* else if (this.menu_name == "garage lighting")
       {
         this.SetUpMenu("CATEGORIES", true, "options", false);
         if (this.Lighting)
@@ -362,7 +381,7 @@ namespace LibertyCityCustoms.Scripts
         this.SetUpMenu("CHANGE LIGHT COLOR", false, "garage lighting", false);
         for (int index = 0; index < this.colorInfo.Length; ++index)
           this.menu.Add(this.colorInfo[index].Name);
-      }
+      }*/
       else if (this.menu_name == "brakes")
       {
         this.SetUpMenu("CHANGE QUALITY OF BRAKES", false, "main", false);
@@ -408,7 +427,9 @@ namespace LibertyCityCustoms.Scripts
       else if (this.menu_name == "Defense")
       {
         this.SetUpMenu("Defense", false, "main", false);
-        this.menu.Add("Full Bullet proof");
+        this.menu.Add("Basic defense");
+        this.menu.Add("Advance defense");
+                
       }
       this.show_from = 0;
       this.i_num = 0;
@@ -602,15 +623,14 @@ namespace LibertyCityCustoms.Scripts
 
     private void SetInGarage(Vector3 position, float heading, Vector3 ex_pos)
     {
-      Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
-     /* Function.Call("FORCE_LOADING_SCREEN", new Parameter[1]
-      {
-         Parameter.op_Implicit(1)
-      });*/
+        Function.Call("FORCE_LOADING_SCREEN", new Parameter[1] { 1 });
+        Vehicle currentVehicle = this.Player.Character.CurrentVehicle;
+     
       this.Player.Character.CurrentVehicle.Position = ((Vector3) position).ToGround();
-      currentVehicle.Heading = heading;
+            this.Wait(3000);
+            Function.Call("FORCE_LOADING_SCREEN", new Parameter[1] { 0 });
+            currentVehicle.Heading = heading;
       this.exit_pos = ex_pos;
-      this.Wait(2000);
       currentVehicle.PlaceOnGroundProperly();
       currentVehicle.FreezePosition = true;
       currentVehicle.DoorLock = (DoorLock) 4;
@@ -619,7 +639,10 @@ namespace LibertyCityCustoms.Scripts
       this.Inside = true;
       this.garage_light.Enabled = true;
       this.garage_light.Range = this.intensity;
+      
 
+
+      //make the vehicle repair
       if (this.Player.Character.CurrentVehicle.Health < 1000)
       {
         this.repair_cost = 1000 - this.repair_cost;
@@ -635,17 +658,20 @@ namespace LibertyCityCustoms.Scripts
 
     private void SetOutOfGarage()
     {
+      Function.Call("FORCE_LOADING_SCREEN", new Parameter[1] { 1 });
       this.Inside = false;
-      this.Player.Character.CurrentVehicle.Position = ((Vector3) this.exit_pos).ToGround();
-      this.Wait(2000);
+      this.Player.Character.CurrentVehicle.Position = (this.exit_pos).ToGround();
       this.Player.Character.CurrentVehicle.PlaceOnGroundProperly();
       this.Player.Character.CurrentVehicle.FreezePosition = false;
       this.Player.Character.CurrentVehicle.DoorLock = (DoorLock) 0;
       this.i_info = "";
       this.garage_light.Enabled = false;
-    }
+      this.Wait(2000);
+     Function.Call("FORCE_LOADING_SCREEN", new Parameter[1] { 0 });
 
-    private void GoBack()
+        }
+
+        private void GoBack()
     {
       if (this.previous_menu == "")
       {
@@ -667,11 +693,24 @@ namespace LibertyCityCustoms.Scripts
       this.Open_menu();
     }
 
+        private bool paying(int amount)
+        {
+               
+
+                if (this.Player.Money - amount < 0)
+                {
+                    Game.DisplayText("not enough money, lack of " + amount + "$");
+                    return false;
+                }
+              
+                this.Player.Money = this.Player.Money - amount;
+            return true;
+            }
     private void menu_nav(object sender, GTA.KeyEventArgs e)
     {
       if (!this.Inside)
       {
-        if (this.SaveMenu || e.Key != this.Settings.GetValueKey("Go_in_garage", "Menu", Keys.Y) || !this.Player.Character.isInVehicle())
+        if (this.SaveMenu || e.Key != this.Settings.GetValueKey("Go_in_garage", "Menu", Keys.Y)||!this.Player.Character.isInVehicle())
           return;
         Model model = this.Player.Character.CurrentVehicle.Model;
         if (!((Model) model).isCar)
@@ -747,13 +786,11 @@ namespace LibertyCityCustoms.Scripts
                 {
                     if (!(this.cur_i == ("Repair     " + repair_price + "$")))
                         return;
-                    if (this.Player.Money - repair_price < 0)
+                    if(paying(repair_price))
                     {
-                        Game.DisplayText("not enough money, lack of " + repair_price + "$");
-                        return;
+                        this.Player.Character.CurrentVehicle.Repair();
                     }
-                    this.Player.Character.CurrentVehicle.Repair();
-                    this.Player.Money = this.Player.Money - repair_price;
+                    
                     this.NextMenu("main");
                 }
                 else if (this.menu_name == "main")
@@ -764,67 +801,47 @@ namespace LibertyCityCustoms.Scripts
                         this.NextMenu("options");
                     else if (this.cur_i == "Brakes")
                         this.NextMenu("brakes");
+                    else if (this.cur_i == "Anti Theft system")
+                        this.NextMenu("Anti Theft system");
                     else if (this.cur_i == "Neons")
                         this.NextMenu("neon");
                     else if (this.cur_i == "Wash")
                     {
-                        /*
-                        Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9]
-{
-                              Parameter.op_Implicit("shot_directed_water"),
-                              Parameter.op_Implicit(this.Player.Character.CurrentVehicle),
-                              Parameter.op_Implicit(-4.7f),
-                              Parameter.op_Implicit(-5f),
-                              Parameter.op_Implicit(8f),
-                              Parameter.op_Implicit(130f),
-                              Parameter.op_Implicit(0.0f),
-                              Parameter.op_Implicit(500f),
-                              Parameter.op_Implicit(5f)
-});
-                        Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9]
+                        if (paying(wash_price))
                         {
-                              Parameter.op_Implicit("shot_directed_water"),
-                              Parameter.op_Implicit(this.Player.Character.CurrentVehicle),
-                              Parameter.op_Implicit(7f),
-                              Parameter.op_Implicit(0.0f),
-                              Parameter.op_Implicit(8f),
-                              Parameter.op_Implicit(130f),
-                              Parameter.op_Implicit(0.0f),
-                              Parameter.op_Implicit(3500f),
-                              Parameter.op_Implicit(5f)
-                        });*/
-                        this.Inside = false;
-                        this.Wait(5000);
-                        this.Inside = true;
-                        this.Player.Character.CurrentVehicle.Wash();
+                            Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9]{"shot_directed_water",
+                              this.Player.Character.CurrentVehicle,-4.7f,-5f,8f,130f,0.0f,500f,5f });
+                            Function.Call<int>("START_PTFX_ON_VEH", new Parameter[9] {"shot_directed_water",
+                              this.Player.Character.CurrentVehicle,7f,0.0f,8f,130f,0.0f,3500f,5f});
+                                this.Inside = false;
+                            this.Wait(2000);
+                            this.Player.Character.CurrentVehicle.Wash();
+                                 this.Wait(2000);
+                                this.Inside = true;
+                                
+                         
+
+                          
+                        }
                     }
+                    
                     else if (this.cur_i == "Extras")
                     {
                         this.NextMenu("extras");
                     }
-                    else
-                    {
-                        if (!(this.cur_i == "Defense"))
-                            return;
+                    else if(this.cur_i == "Defense")
                         this.NextMenu("Defense");
-                    }
                 }
                 else if (this.menu_name == "respray")
                 {
-                    if (this.cur_i == "Primary color   " + color_price + "$")
+                    if (this.cur_i.Contains("Primary color"))
                         this.NextMenu("color");
-                    else if (this.cur_i == "Specular color  " + specular_color_price + "$")
+                    else if (this.cur_i.Contains("Specular color"))
                         this.NextMenu("specular_color");
-                    else if (this.cur_i == "Featured color  " + extra_color_price + "$")
-                    {
+                    else if (this.cur_i.Contains("Featured color"))
                         this.NextMenu("extra_color");
-                    }
-                    else
-                    {
-                        if (!(this.cur_i == "Featured2 color  " + extra2_color_price + "$"))
-                            return;
+                    else if (this.cur_i.Contains("Featured2 color"))
                         this.NextMenu("extra2_color");
-                    }
                 }
                 else if (this.menu_name == "color")
                 {
@@ -861,15 +878,12 @@ namespace LibertyCityCustoms.Scripts
 
                 else if (this.menu_name == "extra2_color")
                 {
-                    if (this.Player.Money - extra2_color_price < 0)
-                        Game.DisplayText("Not enough money");
-                    else
-                    {
-                        this.Player.Money = this.Player.Money - extra2_color_price;
+                    
+                    if (paying(extra2_color_price))
                         this.extra2_col = this.chosen_col;
-                    }
+                   
                 }
-
+                /*
                 else if (this.menu_name == "options")
                 {
                     if (this.cur_i == "Menu position")
@@ -883,7 +897,8 @@ namespace LibertyCityCustoms.Scripts
                         this.NextMenu("garage lighting");
                     }
                 }
-                else if (this.menu_name == "garage lighting")
+                */
+                else if (this.menu_name == "garage lightin")
                 {
                     this.garage_light_current_color = Color.FromName(this.garage_light_name);
                     this.garage_light_name = this.garage_light_current_color.Name;
@@ -1026,11 +1041,40 @@ namespace LibertyCityCustoms.Scripts
                         this.turn_extra(9);
                     }
                 }
-                else
+                else if(this.menu_name == "Anti Theft system")
                 {
-                    if (!(this.menu_name == "Defense") || !(this.cur_i == "Full Bullet proof"))
-                        return;
-                    this.Player.Character.CurrentVehicle.MakeProofTo(true, false, false, false, false);
+                    if(this.cur_i.Contains("Set Primum ATS"))
+                    {
+                
+                        this.Player.Character.CurrentVehicle.AttachBlip();
+                    }
+                }
+                else if((this.menu_name == "Defense"))
+                {
+
+                    if (this.cur_i == "Basic defense")
+                    {
+                        if(paying(basic_defense_price))
+                        {
+                            this.Player.Character.CurrentVehicle.SetMetadata("Defense_level", true, 1);
+                            this.Player.Character.CurrentVehicle.CanBeDamaged = false;
+                            this.Player.Character.CurrentVehicle.MakeProofTo(true, false, false, false, false);
+                        }
+                    }
+                    else if(this.cur_i == "Advance defense")
+                    {
+                        if (paying(advance_defense_price))
+                        {
+                            this.Player.Character.CurrentVehicle.MakeProofTo(true, true, false, true, true);
+                            
+                        }
+                    }
+                       
+
+
+                    
+                    
+                    
                 }
       }
       else
@@ -1108,7 +1152,7 @@ namespace LibertyCityCustoms.Scripts
     private void money_state(object sender, GraphicsEventArgs e)
     {
             
-            e.Graphics.Scaling = (FontScaling)2;
+       e.Graphics.Scaling = (FontScaling)2;
             
         if ((!this.Inside) || this.SaveMenu || !this.Player.Character.isInVehicle())
             return;
@@ -1119,6 +1163,7 @@ namespace LibertyCityCustoms.Scripts
         e.Graphics.DrawText(this.Player.Money+"$", 1024f, 100f,f2);
        
     }
+
 
 
     private void turn_extra(int id)

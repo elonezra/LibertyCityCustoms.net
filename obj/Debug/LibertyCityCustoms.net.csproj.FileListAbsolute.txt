@@ -3,7 +3,15 @@ D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\LibertyCityCustoms.net.pdb
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\ScriptHookDotNet.dll
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\ScriptHookDotNet.xml
-D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csprojAssemblyReference.cache
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csproj.CopyComplete
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.dll
 D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.pdb
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csproj.AssemblyReference.cache
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csproj.AssemblyReference.cache
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csproj.CoreCompileInputs.cache
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.dll
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.pdb
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\LibertyCityCustoms.net.dll
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\LibertyCityCustoms.net.pdb
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\bin\Debug\ScriptHookDotNet.xml
+D:\Games\Grand Theft Auto IV - The Complete Edition\scripts\Proj\LibertyCityCustoms2\LibertyCityCustoms.net\obj\Debug\LibertyCityCustoms.net.csproj.CopyComplete
