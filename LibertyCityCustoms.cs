@@ -76,7 +76,7 @@ namespace LibertyCityCustoms.Scripts
     private float intensity;
     private float light_range;
     private Dictionary<Vehicle, Light> lst;
-    private Vehicle antiTeftCarSave;
+    private Vehicle antiTeftCarSave = null;
     private System.Type colors = typeof (Color);
     private PropertyInfo[] colorInfo;
     private Color cur_light;
@@ -84,11 +84,12 @@ namespace LibertyCityCustoms.Scripts
     private List<VehicleExtra> extr = new List<VehicleExtra>();
     private GTA.Font f;
     private GTA.Font f2 = new GTA.Font("AR DESTINE", 0.9f, (FontScaling) 0, true, false);
+    Blip current_saved_car_blip = null;
     // prices
     int repair_price = 0;
     int color_price = 500;
-        int wash_price = 20;
-    int ATSPpremium_price = 1452;
+    int wash_price = 20;
+    int ATS_Basic_price = 1452;
     int specular_color_price = 700;
     int extra_color_price = 200;
     int extra2_color_price = 170;
@@ -106,8 +107,8 @@ namespace LibertyCityCustoms.Scripts
       {
         this.Settings.Load();
         this.Settings.SetValue("Go_in_garage", "Menu", Keys.Y);
-        this.Settings.SetValue("Up", "Menu", Keys.Up);
-        this.Settings.SetValue("Down", "Menu", Keys.Down);
+        this.Settings.SetValue("Up", "Menu", Keys.Left);
+        this.Settings.SetValue("Down", "Menu", Keys.Right);
         this.Settings.SetValue("x", "Menu", 2f);
         this.Settings.SetValue("y", "Menu", 3.5f);
         this.Settings.SetValue("Do_function", "Menu", Keys.Return);
@@ -124,9 +125,9 @@ namespace LibertyCityCustoms.Scripts
       this.garage_light = new Light();
       this.garage_light_position = new Vector3();
       // ISSUE: method pointer
-      this.BindKey(this.Settings.GetValueKey("Up", "Menu", Keys.Left), new KeyPressDelegate(Move_up));
+      this.BindKey(this.Settings.GetValueKey("Up", "Menu", Keys.W), new KeyPressDelegate(Move_up));
       // ISSUE: method pointer
-      this.BindKey(this.Settings.GetValueKey("Down", "Menu", Keys.Down), new KeyPressDelegate(Move_down));
+      this.BindKey(this.Settings.GetValueKey("Down", "Menu", Keys.S), new KeyPressDelegate(Move_down));
       // ISSUE: method pointer
       this.PerFrameDrawing += new GraphicsEventHandler(menu_draw);
       // ISSUE: method pointer
@@ -153,6 +154,7 @@ namespace LibertyCityCustoms.Scripts
       }
       this.menu_pos_x = this.Settings.GetValueFloat("x", "Menu", 2f);
       this.menu_pos_y = this.Settings.GetValueFloat("y", "Menu", 3.5f);
+              
       this.light_x = this.Settings.GetValueFloat("x", "Garage lighting", 0.0f);
       this.light_y = this.Settings.GetValueFloat("y", "Garage lighting", 0.0f);
       this.light_z = this.Settings.GetValueFloat("z", "Garage lighting", 4f);
@@ -160,16 +162,75 @@ namespace LibertyCityCustoms.Scripts
       this.intensity = this.Settings.GetValueFloat(nameof (intensity), "Garage lighting", 8f);
       this.light_range = this.Settings.GetValueFloat("range", "Garage lighting", 10f);
       this.Lighting = this.Settings.GetValueBool("enabled", "Garage lighting", false);
-      Game.Console.Print("LibertyCityCustoms V2.2 by Elon loaded !");
-      
-    }
+        Game.Console.Print("LibertyCityCustoms V2.2 by Elon loaded !");
+        this.BindPhoneNumber("000", new PhoneDialDelegate(()=>{ Game.DisplayText("you made a call"); }));
+            
+     
 
+        }
+      
     private void ticks(object sender, EventArgs e)
     {
-            if(this.Player.Character.isInVehicle())
+
+            if (antiTeftCarSave != null)
             {
-                Game.DisplayText(Player.Character.CurrentVehicle.GetMetadata<int>("Defense_level") + ": engin Health");
+              
+
+                if (!this.Player.Character.isInVehicle())
+                {
+                                      
+                        if (antiTeftCarSave.HasMetadata("ATS"))
+                        {
+                            if (current_saved_car_blip == null || !current_saved_car_blip.Exists())
+                            {
+                                Game.Console.Print("blip not exist");
+                                //current_saved_car_blip.Delete();
+                                current_saved_car_blip = antiTeftCarSave.AttachBlip();
+                               current_saved_car_blip.Icon = BlipIcon.Building_Garage;
+                               current_saved_car_blip.Name = "Saved car";
+                                current_saved_car_blip.Color = BlipColor.Orange;
+                            }
+                        }
+                }
+            
+            else
+                {
+                    //Game.Console.Print("in car");
+                     
+                    if ((current_saved_car_blip != null && current_saved_car_blip.Exists()))
+                    {
+                        Game.Console.Print("blip is not exist");
+                        current_saved_car_blip.Delete();
+
+                    }
+                }
+                if (antiTeftCarSave.EngineHealth <= 0)
+                {
+                    current_saved_car_blip.Delete();
+                    antiTeftCarSave.isRequiredForMission = false;
+                    antiTeftCarSave = null;
+                }
+
+            }            
+                           
+            
+ 
+            if (this.Player.Character.isInVehicle())
+            {
+                    if(this.Player.Character.CurrentVehicle.HasMetadata("Defense_level"))
+                    {
+                        Player.Character.MakeProofTo(true, false, false, false, false);
+                    }          
             }
+            else
+            {
+                
+                Player.Character.MakeProofTo(false, false, false, false, false);
+            }
+
+
+
+
             if (this.lst.Count > 0)
       {
         foreach (KeyValuePair<Vehicle, Light> keyValuePair in this.lst)
@@ -212,6 +273,7 @@ namespace LibertyCityCustoms.Scripts
       }
       if (!this.Inside)
         return;
+      /*
       if (this.Lighting)
       {
         this.garage_light_position = this.Player.Character.CurrentVehicle.GetOffsetPosition(new Vector3(this.light_x, this.light_y, this.light_z));
@@ -258,6 +320,7 @@ namespace LibertyCityCustoms.Scripts
           return;
         this.light_range += 2f;
       }
+      */
       else
       {
         if (!(this.menu_name == "menu_pos"))
@@ -322,7 +385,7 @@ namespace LibertyCityCustoms.Scripts
         this.menu.Add("Anti Theft system");
         this.menu.Add("Extras");
         this.menu.Add("Wash");
-        this.menu.Add("Options");
+        //this.menu.Add("Options");
         this.menu.Add("Exit");
       }
       else if (this.menu_name == "repair")
@@ -343,7 +406,7 @@ namespace LibertyCityCustoms.Scripts
       else if (this.menu_name == "Anti Theft system")
       {
         this.SetUpMenu("Anti Theft system", false, "main", false);
-        this.menu.Add("Set Primum ATS  " + color_price + "$");
+        this.menu.Add("Set Basic ATS  " + ATS_Basic_price + "$");
       }
 
       else if (this.menu_name == "color" || this.menu_name == "specular_color" || this.menu_name == "extra_color" || this.menu_name == "extra2_color")
@@ -427,8 +490,8 @@ namespace LibertyCityCustoms.Scripts
       else if (this.menu_name == "Defense")
       {
         this.SetUpMenu("Defense", false, "main", false);
-        this.menu.Add("Basic defense");
-        this.menu.Add("Advance defense");
+        this.menu.Add("Basic defense    "+basic_defense_price + "$");
+        this.menu.Add("Advance defense    " + advance_defense_price + "$");
                 
       }
       this.show_from = 0;
@@ -693,7 +756,7 @@ namespace LibertyCityCustoms.Scripts
       this.Open_menu();
     }
 
-        private bool paying(int amount)
+    private bool paying(int amount)
         {
                
 
@@ -856,24 +919,17 @@ namespace LibertyCityCustoms.Scripts
                 }
                 else if (this.menu_name == "specular_color")
                 {
-                    if (this.Player.Money - specular_color_price < 0)
-                        Game.DisplayText("Not enough money");
-                    else
-                    {
-                        this.Player.Money = this.Player.Money - specular_color_price;
-                        this.specular_col = this.chosen_col;
-                    }
+                    
+                    if (paying(specular_color_price))
+                       this.specular_col = this.chosen_col;
+              
                 }
 
                 else if (this.menu_name == "extra_color")
                 {
-                    if (this.Player.Money - extra_color_price < 0)
-                        Game.DisplayText("Not enough money");
-                    else
-                    {
-                        this.Player.Money = this.Player.Money - extra_color_price;
+                    if (paying(specular_color_price))
                         this.extra_col = this.chosen_col;
-                    }
+                    
                 }
 
                 else if (this.menu_name == "extra2_color")
@@ -1043,37 +1099,41 @@ namespace LibertyCityCustoms.Scripts
                 }
                 else if(this.menu_name == "Anti Theft system")
                 {
-                    if(this.cur_i.Contains("Set Primum ATS"))
+                    if(this.cur_i.Contains("Set Basic ATS"))
                     {
-                
-                        this.Player.Character.CurrentVehicle.AttachBlip();
+                        if(paying(ATS_Basic_price))
+                        {
+                            this.Player.Character.CurrentVehicle.SetMetadata("ATS", false, 1);
+                            this.Player.Character.CurrentVehicle.isRequiredForMission = true;
+                            this.antiTeftCarSave = (Vehicle)Player.Character.CurrentVehicle;
+                        }
+                       
+                        
                     }
                 }
                 else if((this.menu_name == "Defense"))
                 {
 
-                    if (this.cur_i == "Basic defense")
+                    if (this.cur_i.StartsWith("Basic defense"))
                     {
                         if(paying(basic_defense_price))
                         {
                             this.Player.Character.CurrentVehicle.SetMetadata("Defense_level", true, 1);
-                            this.Player.Character.CurrentVehicle.CanBeDamaged = false;
+                            
                             this.Player.Character.CurrentVehicle.MakeProofTo(true, false, false, false, false);
                         }
                     }
-                    else if(this.cur_i == "Advance defense")
+                    else if(this.cur_i.StartsWith("Advance defense"))
                     {
                         if (paying(advance_defense_price))
                         {
                             this.Player.Character.CurrentVehicle.MakeProofTo(true, true, false, true, true);
-                            
+                            this.Player.Character.CurrentVehicle.CanBeDamaged = true;
+                            this.Player.Character.CurrentVehicle.CanBeVisiblyDamaged = false;
+                            this.Player.Character.CurrentVehicle.SetMetadata("Defense_level", true, 2);
+
                         }
                     }
-                       
-
-
-                    
-                    
                     
                 }
       }
