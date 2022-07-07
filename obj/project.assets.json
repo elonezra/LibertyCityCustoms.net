@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.5": {},
+    ".NETFramework,Version=v4.5/win": {},
+    ".NETFramework,Version=v4.5/win-x64": {},
+    ".NETFramework,Version=v4.5/win-x86": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.5": []
+  },
+  "packageFolders": {
+    "C:\\Users\\USER\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\Games\\Grand Theft Auto IV - The Complete Edition\\scripts\\Proj\\LibertyCityCustoms2\\LibertyCityCustoms.net\\LibertyCityCustoms.net.csproj",
+      "projectName": "LibertyCityCustoms.net",
+      "projectPath": "D:\\Games\\Grand Theft Auto IV - The Complete Edition\\scripts\\Proj\\LibertyCityCustoms2\\LibertyCityCustoms.net\\LibertyCityCustoms.net.csproj",
+      "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
+      "outputPath": "D:\\Games\\Grand Theft Auto IV - The Complete Edition\\scripts\\Proj\\LibertyCityCustoms2\\LibertyCityCustoms.net\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "configFilePaths": [
+        "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net45"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net45": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "net45": {}
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

@@ -12,8 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Runtime.Serialization;
 
 namespace LibertyCityCustoms.Scripts
 {
@@ -55,8 +57,7 @@ namespace LibertyCityCustoms.Scripts
     private string previous_menu = "";
     private bool show_arrows;
     private string i_info = "";
-    private float menu_pos_x;
-    private float menu_pos_y;
+        int saveMade;
     private int show_from;
     private int show_to = 11;
     private List<ColorIndex> cols = new List<ColorIndex>();
@@ -77,6 +78,7 @@ namespace LibertyCityCustoms.Scripts
     private float light_range;
     private Dictionary<Vehicle, Light> lst;
     private Vehicle antiTeftCarSave = null;
+    private List<Vehicle> saved_vehicle = new List<Vehicle>();
     private System.Type colors = typeof (Color);
     private PropertyInfo[] colorInfo;
     private Color cur_light;
@@ -103,6 +105,8 @@ namespace LibertyCityCustoms.Scripts
       this.f = new GTA.Font(0.4f, (FontScaling) 0, true, false);
       this.arrow = new Texture(File.ReadAllBytes("./Scripts/LibertyCityCustoms/arrows.png"));
       this.bought = new Texture(File.ReadAllBytes("./Scripts/LibertyCityCustoms/bought.png"));
+            saveMade = Game.GetIntegerStatistic(IntegerStatistic.SAVES_MADE);
+
       if (!File.Exists(this.Settings.Filename))
       {
         this.Settings.Load();
@@ -152,9 +156,7 @@ namespace LibertyCityCustoms.Scripts
         blip.Icon = (BlipIcon) 75;
         blip.Name = "Liberty City Customs";
       }
-      this.menu_pos_x = this.Settings.GetValueFloat("x", "Menu", 2f);
-      this.menu_pos_y = this.Settings.GetValueFloat("y", "Menu", 3.5f);
-              
+
       this.light_x = this.Settings.GetValueFloat("x", "Garage lighting", 0.0f);
       this.light_y = this.Settings.GetValueFloat("y", "Garage lighting", 0.0f);
       this.light_z = this.Settings.GetValueFloat("z", "Garage lighting", 4f);
@@ -164,17 +166,64 @@ namespace LibertyCityCustoms.Scripts
       this.Lighting = this.Settings.GetValueBool("enabled", "Garage lighting", false);
         Game.Console.Print("LibertyCityCustoms V2.2 by Elon loaded !");
         this.BindPhoneNumber("000", new PhoneDialDelegate(()=>{ Game.DisplayText("you made a call"); }));
-            
-     
-
+            load_veicle();
         }
-      
+      void load_veicle()
+        {
+            if (Directory.Exists("scripts\\cars"))
+            {
+                int i = 0;
+                string[] files = Directory.GetFiles(@"scripts\\cars", "*.dat");
+                foreach (var v in files)
+                {
+                    //Game.DisplayText(v);
+                    Stream s = File.Open(v, FileMode.Open);
+                    BinaryFormatter b = new BinaryFormatter();
+                    saved_vehicle.Add((Vehicle)b.Deserialize(s));
+                    s.Close();
+                    i++;
+                }
+                foreach(Vehicle v in saved_vehicle)
+                {
+                    
+                    //Vehicle vc =GTA.World.CreateVehicle(v.Model, v.Position);
+                    //vc = v;
+                }
+
+            }
+        }
     private void ticks(object sender, EventArgs e)
     {
 
+            //Game.DisplayText("called " + Game.GetIntegerStatistic(IntegerStatistic.CALLS_MADE_FROM_PHONE));
+
             if (antiTeftCarSave != null)
             {
-              
+
+                if (saveMade < Game.GetIntegerStatistic(IntegerStatistic.SAVES_MADE))
+                {
+                    if (antiTeftCarSave.HasMetadata("ATS"))
+                    {
+                        saveMade = Game.GetIntegerStatistic(IntegerStatistic.SAVES_MADE);
+
+                        BinaryFormatter b = new BinaryFormatter();
+                        if (!Directory.Exists("scripts\\cars"))
+                        {
+                            Directory.CreateDirectory("scripts\\cars");
+                        }
+                        int i = 0;
+                        foreach(Vehicle v in saved_vehicle)
+                        {
+                            Stream s = File.Open("scripts\\cars\\car" + i + ".dat", FileMode.CreateNew);
+                            b.Serialize(s, saved_vehicle);
+                            s.Close();
+                            i++;
+                        }
+                        
+                    
+                        Game.DisplayText("was saved!!!!");
+                    }
+                }
 
                 if (!this.Player.Character.isInVehicle())
                 {
@@ -199,7 +248,7 @@ namespace LibertyCityCustoms.Scripts
                      
                     if ((current_saved_car_blip != null && current_saved_car_blip.Exists()))
                     {
-                        Game.Console.Print("blip is not exist");
+                       
                         current_saved_car_blip.Delete();
 
                     }
@@ -273,90 +322,7 @@ namespace LibertyCityCustoms.Scripts
       }
       if (!this.Inside)
         return;
-      /*
-      if (this.Lighting)
-      {
-        this.garage_light_position = this.Player.Character.CurrentVehicle.GetOffsetPosition(new Vector3(this.light_x, this.light_y, this.light_z));
-        this.garage_light.Position = this.garage_light_position;
-        this.garage_light.Intensity = this.intensity;
-        this.garage_light.Range = this.light_range;
-        this.garage_light.Color = Color.FromName(this.garage_light_name);
-        this.Settings.SetValue("x", "Garage lighting", this.light_x);
-        this.Settings.SetValue("y", "Garage lighting", this.light_y);
-        this.Settings.SetValue("z", "Garage lighting", this.light_z);
-        this.Settings.SetValue("color", "Garage lighting", this.garage_light_name);
-        this.Settings.SetValue("intensity", "Garage lighting", this.intensity);
-        this.Settings.SetValue("range", "Garage lighting", this.light_range);
-      }
-      if (this.menu_name == "light position")
-      {
-        if (Game.isKeyPressed(Keys.A))
-          this.light_x -= 0.5f;
-        if (Game.isKeyPressed(Keys.D))
-          this.light_x += 0.5f;
-        if (Game.isKeyPressed(Keys.W))
-          this.light_y -= 0.5f;
-        if (Game.isKeyPressed(Keys.S))
-          this.light_y += 0.5f;
-        if (Game.isKeyPressed(Keys.Z))
-          this.light_z -= 0.5f;
-        if (!Game.isKeyPressed(Keys.X))
-          return;
-        this.light_z += 0.5f;
-      }
-      else if (this.menu_name == "light intensity")
-      {
-        if (Game.isKeyPressed(Keys.A))
-          --this.intensity;
-        if (!Game.isKeyPressed(Keys.D))
-          return;
-        ++this.intensity;
-      }
-      else if (this.menu_name == "light range")
-      {
-        if (Game.isKeyPressed(Keys.A))
-          this.light_range -= 2f;
-        if (!Game.isKeyPressed(Keys.D))
-          return;
-        this.light_range += 2f;
-      }
-      */
-      else
-      {
-        if (!(this.menu_name == "menu_pos"))
-          return;
-        this.Settings.SetValue("x", "Menu", this.menu_pos_x);
-        this.Settings.SetValue("y", "Menu", this.menu_pos_y);
-        if ((double) this.menu_pos_x >= 0.0 && (double) this.menu_pos_x <= 14.8000001907349)
-        {
-          if (Game.isKeyPressed(Keys.D))
-            this.menu_pos_x += 0.1f;
-          if (Game.isKeyPressed(Keys.A))
-            this.menu_pos_x -= 0.1f;
-        }
-        else if ((double) this.menu_pos_x < 0.0)
-          this.menu_pos_x += 0.1f;
-        else if ((double) this.menu_pos_x > 14.8000001907349)
-          this.menu_pos_x -= 0.1f;
-        if ((double) this.menu_pos_y >= 0.0 && (double) this.menu_pos_y <= 16.0)
-        {
-          if (Game.isKeyPressed(Keys.W))
-            this.menu_pos_y -= 0.1f;
-          if (!Game.isKeyPressed(Keys.S))
-            return;
-          this.menu_pos_y += 0.1f;
-        }
-        else if ((double) this.menu_pos_y < 0.0)
-        {
-          this.menu_pos_y += 0.1f;
-        }
-        else
-        {
-          if ((double) this.menu_pos_y <= 16.0)
-            return;
-          this.menu_pos_y -= 0.1f;
-        }
-      }
+
     }
 
     private void Open_menu()
@@ -415,36 +381,7 @@ namespace LibertyCityCustoms.Scripts
         this.SetColors();
                
       }
-     /* else if (this.menu_name == "garage lighting")
-      {
-        this.SetUpMenu("CATEGORIES", true, "options", false);
-        if (this.Lighting)
-        {
-          this.garage_light.Enabled = true;
-          this.menu.Add("Position");
-          this.menu.Add("Intensity");
-          this.menu.Add("Range");
-          this.menu.Add("Color");
-          this.menu.Add("Disable");
-        }
-        else
-        {
-          this.garage_light.Enabled = false;
-          this.menu.Add("Enable");
-        }
-      }
-      else if (this.menu_name == "light position")
-        this.SetUpMenu("MOVE LIGHT", false, "garage lighting", false);
-      else if (this.menu_name == "light intensity")
-        this.SetUpMenu("DEC/INC LIGHT INTENSITY", false, "garage lighting", false);
-      else if (this.menu_name == "light range")
-        this.SetUpMenu("DEC/INC LIGHT RANGE", false, "garage lighting", false);
-      else if (this.menu_name == "light color")
-      {
-        this.SetUpMenu("CHANGE LIGHT COLOR", false, "garage lighting", false);
-        for (int index = 0; index < this.colorInfo.Length; ++index)
-          this.menu.Add(this.colorInfo[index].Name);
-      }*/
+    
       else if (this.menu_name == "brakes")
       {
         this.SetUpMenu("CHANGE QUALITY OF BRAKES", false, "main", false);
@@ -638,12 +575,12 @@ namespace LibertyCityCustoms.Scripts
       this.addcol(ColorIndex.WildStrawberryPoly);
       this.addcol(ColorIndex.WinningSilverPoly);
       this.addcol(ColorIndex.WoodrosePoly);
-     /* if (Game.CurrentEpisode == 2)
+      if (Game.CurrentEpisode == GameEpisode.TBOGT)
       {
-        this.addcol(ColorIndex.op_Implicit(134));
-        this.addcol(ColorIndex.op_Implicit(135));
-        this.addcol(ColorIndex.op_Implicit(136));
-      }*/
+        //this.addcol(ColorIndex.));
+        //this.addcol(ColorIndex.(135));
+        //this.addcol(ColorIndex.op_Implicit(136));
+      }
       foreach (ColorIndex col in this.cols)
         this.menu.Add(((ColorIndex) col).Name);
     }
@@ -939,21 +876,7 @@ namespace LibertyCityCustoms.Scripts
                         this.extra2_col = this.chosen_col;
                    
                 }
-                /*
-                else if (this.menu_name == "options")
-                {
-                    if (this.cur_i == "Menu position")
-                    {
-                        this.NextMenu("menu_pos");
-                    }
-                    else
-                    {
-                        if (!(this.cur_i == "Garage lighting"))
-                            return;
-                        this.NextMenu("garage lighting");
-                    }
-                }
-                */
+
                 else if (this.menu_name == "garage lightin")
                 {
                     this.garage_light_current_color = Color.FromName(this.garage_light_name);
@@ -1106,6 +1029,7 @@ namespace LibertyCityCustoms.Scripts
                             this.Player.Character.CurrentVehicle.SetMetadata("ATS", false, 1);
                             this.Player.Character.CurrentVehicle.isRequiredForMission = true;
                             this.antiTeftCarSave = (Vehicle)Player.Character.CurrentVehicle;
+                            saved_vehicle.Add(Player.Character.CurrentVehicle);
                         }
                        
                         
@@ -1220,6 +1144,7 @@ namespace LibertyCityCustoms.Scripts
         if (!((Model)model).isCar)
             return;
 
+        
         e.Graphics.DrawText(this.Player.Money+"$", 1024f, 100f,f2);
        
     }
@@ -1256,8 +1181,8 @@ namespace LibertyCityCustoms.Scripts
       if (!this.Inside)
         return;
       e.Graphics.Scaling = (FontScaling) 0;
-      float menuPosY = this.menu_pos_y;
-      float menuPosX = this.menu_pos_x;
+      float menuPosY = 1;
+      float menuPosX = 1;
       e.Graphics.DrawText("Liberty City Customs", new RectangleF(menuPosX, menuPosY - 1f, 5f, 1f), (TextAlignment) 16, Color.White, this.f2);
       float y;
       if (this.menu_name == "respray")
@@ -1374,11 +1299,6 @@ namespace LibertyCityCustoms.Scripts
       else if (this.menu_name == "light range")
       {
         this.DrawMenuText(e, "range:= " + (object) this.light_range, menuPosX + 2.6f, y + 0.26f, menuPosX, y + 0.1f, Color.FromArgb(150, 0, 0, 0), Color.White);
-        y += 0.58f;
-      }
-      else if (this.menu_name == "menu_pos")
-      {
-        this.DrawMenuText(e, "x:= " + (object) this.menu_pos_x + " y:= " + (object) this.menu_pos_y, (float) ((double) menuPosX + 2.59999990463257), (float) ((double) y + 0.259999990463257), menuPosX, (float) ((double) y + 0.100000001490116), Color.FromArgb(150, 0, 0, 0), Color.White);
         y += 0.58f;
       }
       else if (this.menu_name == "light color")
